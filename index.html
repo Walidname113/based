@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Поиск по базе</title>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    input, button { padding: 8px; margin: 5px; }
+    #result { margin-top: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>Поиск по CSV базе</h2>
+  <input type="text" id="name" placeholder="Имя (name)">
+  <input type="text" id="date" placeholder="Дата (date)">
+  <button onclick="search()">Искать</button>
+
+  <div id="result">Загрузка базы...</div>
+
+  <script>
+    let db = [];
+
+    // Загружаем CSV из public
+    fetch('/data.csv')
+      .then(response => response.text())
+      .then(csv => {
+        const parsed = Papa.parse(csv, { header: true, delimiter: ";" });
+        db = parsed.data;
+        document.getElementById("result").innerText = "База загружена.";
+      });
+
+    function search() {
+      const name = document.getElementById("name").value.trim().toLowerCase();
+      const date = document.getElementById("date").value.trim();
+      const found = db.find(entry =>
+        entry.name?.toLowerCase() === name && entry.date === date
+      );
+
+      const resultDiv = document.getElementById("result");
+      if (found) {
+        resultDiv.innerText = `Найдено: ${JSON.stringify(found)}`;
+      } else {
+        resultDiv.innerText = "Ничего не найдено.";
+      }
+    }
+  </script>
+</body>
+</html>
